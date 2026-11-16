@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+.venv
+data
+node_modules
+web/node_modules
+web/dist
+.impeccable
+.taste-skill
+credentials*.json
+*token*.json
+*service-account*.json
+__pycache__
+.pytest_cache
+.ruff_cache
+test-results

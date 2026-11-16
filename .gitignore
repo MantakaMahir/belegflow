@@ -1,0 +1,32 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+credentials*.json
+*service-account*.json
+*token*.json
+secrets/
+
+# Local documents, SQLite databases and generated assets
+data/
+*.db
+*.db-*
+*.sqlite*
+*.log
+
+# Tooling
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+test-results/
+playwright-report/
+.impeccable/
+.taste-skill/
+.DS_Store
+Thumbs.db
