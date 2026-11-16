@@ -1,9 +1,11 @@
 # Security policy and operating boundary
 
-BelegFlow is a local, single-operator portfolio product. It is not designed to
-accept untrusted internet traffic, and it is not certified for regulated financial
-data. Do not expose the application publicly without authentication, authorization,
-TLS, isolated document storage, malware controls, and a production job system.
+Beleg: German Tax Document Review is a local, single-operator portfolio product.
+It is not designed for untrusted internet traffic or certified for regulated
+financial data. The VPS production profile requires owner-only Cloudflare Access
+and origin authentication. Publish only after the Access app/policy, Tunnel
+origin-token validation, loopback-only ports, and origin credential have all been
+configured and verified. Do not bypass that boundary or publish the API directly.
 
 ## Credentials
 

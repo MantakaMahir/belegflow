@@ -3,12 +3,16 @@ services:
     build: .
     ports:
       - "127.0.0.1:8000:8000"
+    restart: unless-stopped
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://freellm.gotiq.co/v1}
       OPENAI_MODEL: ${OPENAI_MODEL:-auto}
       DATA_DIR: /app/data
       SEED_DEMO: "true"
+      CLOUDFLARE_ACCESS_REQUIRED: ${CLOUDFLARE_ACCESS_REQUIRED:-false}
+      PUBLIC_ACCESS_EMAIL: ${PUBLIC_ACCESS_EMAIL:-}
+      PUBLIC_HOST: ${PUBLIC_HOST:-}
     volumes:
       - belegflow-data:/app/data
     init: true

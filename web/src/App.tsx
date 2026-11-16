@@ -395,7 +395,7 @@ function SourceDocument({ run }: { run: Run }) {
           <div className="paper-bottom">
             <span>
               {run.mode === 'demo'
-                ? 'BelegFlow demo · synthetic content'
+                ? 'Beleg demo · synthetic content'
                 : 'Original extracted text · verify against your source file'}
             </span>
             <span>1</span>
@@ -508,11 +508,11 @@ function SettingsPage({
         <ShieldCheck size={21} />
         <div>
           <h3>Local-first is not the same as offline.</h3>
-          <p>
-            Demo makes no AI or Google requests. Live mode sends document content to your configured
-            AI endpoint and queries Frankfurter for FX. The application is for a trusted local
-            operator, not an internet-facing multi-user service.
-          </p>
+            <p>
+              Demo makes no AI or Google requests. Live mode sends document content to your configured
+              AI endpoint and queries Frankfurter for FX. The VPS copy is protected by Cloudflare
+              Access for its owner; do not share access or use it for real tax records.
+            </p>
         </div>
       </div>
       <a
@@ -727,8 +727,8 @@ export default function App() {
             <Layers2 size={23} />
           </span>
           <span>
-            Beleg<span>Flow</span>
-            <small>Document intelligence</small>
+            Beleg:
+            <small>German Tax Document Review</small>
           </span>
         </a>
         <div className="workspace-label">
@@ -824,7 +824,7 @@ export default function App() {
             <h1>{title}</h1>
             <p>
               {view === 'documents'
-                ? 'From scattered documents to review-ready records.'
+                ? 'From source file to reviewed German tax records.'
                 : view === 'workflow'
                   ? 'A real pipeline. Nothing behind a black box.'
                   : view === 'activity'
@@ -1214,7 +1214,7 @@ export default function App() {
         )}
         <footer className="workspace-footer">
           <span>
-            <Layers2 size={13} /> BelegFlow <span>·</span> Open-source document intelligence
+            <Layers2 size={13} /> Beleg <span>·</span> Open-source document review
           </span>
           <span>FastAPI / LangGraph / React Flow</span>
         </footer>

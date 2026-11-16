@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     openai_model: str = "auto"
     data_dir: Path = Path("data")
     seed_demo: bool = True
+    public_host: str = ""
+    cloudflare_access_required: bool = False
+    public_access_email: str = ""
     max_upload_bytes: int = Field(default=15 * 1024 * 1024, ge=1024)
     max_pages: int = Field(default=10, ge=1, le=30)
     google_credentials_file: str = ""

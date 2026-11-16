@@ -1,8 +1,8 @@
-# BelegFlow
+# Beleg: German Tax Document Review
 
-**Turn documents into reviewable German tax records—with the workflow visible.**
+**Turn documents into reviewable German tax records with the workflow visible.**
 
-BelegFlow is a local-first, open-source application for document intake, German
+Beleg is a local-first, open-source application for German tax document intake,
 translation, structured extraction, historical EUR conversion, and suggested tax
 classification. It replaces an existing n8n automation with a Python execution
 pipeline and an interactive React workspace. **n8n is not required.**
@@ -14,6 +14,9 @@ checkpoint, review, and export code.
 > **Scope:** a single-operator local application, not a tax adviser or a hardened
 > internet-facing SaaS. Human approval is required before export. This project
 > does not claim tax-law compliance, calibrated AI confidence, or audited accuracy.
+
+The VPS demo is restricted to the owner's Cloudflare Access identity. It is not
+open public document processing. See [`deploy/README.md`](deploy/README.md).
 
 ## What you can do
 
@@ -46,7 +49,8 @@ deployment is needed for the demo. The first build downloads dependencies;
 subsequent demo use does not call external services.
 
 Documents and checkpoints persist in the `belegflow-data` Docker volume. Stop the
-application with `docker compose down`; this does not delete the volume.
+application with `docker compose down`; this does not delete the volume. See
+[`deploy/README.md`](deploy/README.md) for the owner-only VPS deployment.
 
 ### Option B: Python + Node.js
 
@@ -117,13 +121,17 @@ OPENAI_MODEL=auto
 Restart the backend, select **Live**, and upload a document. Other
 OpenAI-compatible endpoints are supported by changing `OPENAI_BASE_URL` and
 `OPENAI_MODEL`; actual compatibility depends on their chat-completions and model
-capabilities. No subscription to BelegFlow is required; providers may charge for use.
+capabilities. No subscription to this software is required; providers may charge for use.
 
 The application requests JSON, validates it against Pydantic models, and permits
 one schema-repair attempt. It does not assume every compatible proxy supports
 OpenAI's strict JSON-schema response mode. Text documents need a text-capable
 model; scanned PDFs and images additionally require **vision support** behind
 the configured model. `auto` routing does not guarantee that support.
+
+The VPS production profile requires both the verified Cloudflare Access identity
+and a separate Caddy origin credential. These deployment settings are not enabled
+by the local demo profile.
 
 ### Configuration
 
@@ -318,7 +326,7 @@ tools, extraction and tax agents, merge/cleanup nodes, and Google Sheets output.
 Its Gmail branch was disabled. This application preserves the use case rather
 than reproducing every node mechanically:
 
-| Original automation | BelegFlow |
+| Original automation | Beleg |
 | --- | --- |
 | Drive trigger + binary/base64 nodes | Upload/EML intake and explicit optional Google import |
 | Gemini OCR HTTP request | Local text extraction plus compatible vision calls |

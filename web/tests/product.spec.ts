@@ -4,6 +4,8 @@ test('demo review, workflow inspection, and export', async ({ page }, testInfo) 
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
+  await expect(page).toHaveTitle('Beleg: German Tax Document Review');
+  await expect(page.getByRole('link', { name: /Beleg: German Tax Document Review/ })).toBeVisible();
   await page.keyboard.press('Tab');
   await expect(page.locator('.skip-link')).toBeFocused();
   const focusTop = await page
@@ -44,10 +46,30 @@ test('mobile document selection, validation, and setup', async ({ page }, testIn
   await page.screenshot({ path: testInfo.outputPath('mobile.png'), fullPage: true });
   for (const width of [320, 390, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: width < 650 ? 844 : 900 });
+    const dimensions = await page.evaluate(() => ({
+      innerWidth: window.innerWidth,
+      documentWidth: document.documentElement.scrollWidth,
+      bodyWidth: document.body.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+      deviceWidth: document.documentElement.getBoundingClientRect().width,
+      viewport: document.querySelector('meta[name="viewport"]')?.getAttribute('content'),
+      largestRight: Math.max(
+        ...[...document.querySelectorAll('body *')]
+          .filter((element) => getComputedStyle(element).position !== 'fixed')
+          .map((element) => element.getBoundingClientRect().right),
+      ),
+    }));
     expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-      `No horizontal overflow at ${width}px`,
+      dimensions.documentWidth <= dimensions.innerWidth &&
+        dimensions.bodyWidth <= dimensions.innerWidth &&
+        dimensions.clientWidth === dimensions.innerWidth &&
+        dimensions.deviceWidth === dimensions.innerWidth &&
+        dimensions.largestRight <= dimensions.innerWidth,
+      `No horizontal overflow at ${width}px: ${JSON.stringify(dimensions)}`,
     ).toBe(true);
+    if (width === 320) {
+      await page.screenshot({ path: testInfo.outputPath('mobile-320.png'), fullPage: true });
+    }
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: 'Try a sample' }).click();

@@ -1,4 +1,4 @@
-# BelegFlow design system
+# Beleg: German Tax Document Review design system
 
 ## Product surface
 

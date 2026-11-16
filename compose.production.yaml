@@ -1,0 +1,24 @@
+services:
+  app:
+    restart: unless-stopped
+    mem_limit: 2g
+    cpus: 1.5
+    environment:
+      CLOUDFLARE_ACCESS_REQUIRED: "true"
+      PUBLIC_HOST: belegflow.gotiq.co
+      PUBLIC_ACCESS_EMAIL: ${PUBLIC_ACCESS_EMAIL:?Set the exact Cloudflare Access identity email in the VPS .env}
+
+  proxy:
+    image: caddy:2.11.2-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - path: ${BELEG_PROXY_ENV_FILE:-/srv/belegflow/secrets/proxy.env}
+        required: true
+        format: raw
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro

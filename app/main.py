@@ -114,17 +114,33 @@ def create_app(settings=None):
         yield
         await run_in_threadpool(engine.close)
 
-    app = FastAPI(title="BelegFlow", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="Beleg: German Tax Document Review", version="0.1.0", lifespan=lifespan)
     app.state.engine, app.state.store = engine, store
     app.add_middleware(RequestSizeLimitMiddleware, limit=settings.max_upload_bytes + 1024 * 1024)
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "[::1]"])
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=[
+            "localhost",
+            "127.0.0.1",
+            "[::1]",
+            *([settings.public_host] if settings.public_host else []),
+        ],
+    )
 
     @app.middleware("http")
     async def local_boundary(request, call_next):
+        if settings.cloudflare_access_required and request.url.path != "/api/health":
+            access_email = request.headers.get("cf-access-authenticated-user-email", "")
+            if not settings.public_access_email or (
+                access_email.strip().lower() != settings.public_access_email.strip().lower()
+            ):
+                return JSONResponse(
+                    {"detail": "Cloudflare Access authentication required."}, status_code=403
+                )
         if request.method not in {"GET", "HEAD", "OPTIONS"}:
             origin = request.headers.get("origin")
             same_origin = f"{request.url.scheme}://{request.headers.get('host', '')}"
-            if origin and origin not in {
+            allowed_origins = {
                 same_origin,
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
@@ -132,7 +148,10 @@ def create_app(settings=None):
                 "http://127.0.0.1:4173",
                 "http://localhost:8000",
                 "http://127.0.0.1:8000",
-            }:
+            }
+            if settings.public_host:
+                allowed_origins.add(f"https://{settings.public_host}")
+            if origin and origin not in allowed_origins:
                 return JSONResponse(
                     {"detail": "Cross-origin writes are not allowed."}, status_code=403
                 )

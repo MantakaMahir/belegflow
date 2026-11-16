@@ -31,7 +31,8 @@ jobs:
       - run: npm run test:e2e
         working-directory: web
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
-          name: browser-failure-evidence
+          name: browser-test-evidence
           path: web/test-results
+          if-no-files-found: ignore

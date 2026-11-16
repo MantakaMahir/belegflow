@@ -1,1 +1,1 @@
-"""BelegFlow: document intake with inspectable, checkpointed execution."""
+"""Beleg: German tax document review with inspectable, checkpointed execution."""

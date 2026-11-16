@@ -1,0 +1,21 @@
+{
+	admin off
+	auto_https off
+}
+
+:8080 {
+	@beleg host belegflow.gotiq.co
+	handle @beleg {
+		basic_auth {
+			{$BELEG_USERNAME} {$BELEG_PASSWORD_HASH}
+		}
+		reverse_proxy app:8000 {
+			header_up -Authorization
+			header_up Host belegflow.gotiq.co
+			header_up X-Forwarded-Proto https
+		}
+	}
+	handle {
+		respond "Unknown host" 403
+	}
+}

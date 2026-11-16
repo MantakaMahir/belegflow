@@ -198,6 +198,53 @@ def test_duplicate_intake_and_local_boundaries(client):
     assert "api_key" not in str(client.get("/api/config").json()).lower()
 
 
+def test_only_local_hosts_are_allowed(client):
+    assert client.get("/api/health", headers={"Host": "attacker.example"}).status_code == 400
+
+
+def test_configured_public_host_is_allowed_but_spoofed_hosts_are_not(tmp_path):
+    settings = Settings(
+        data_dir=tmp_path, seed_demo=False, public_host="belegflow.gotiq.co", _env_file=None
+    )
+    with TestClient(create_app(settings), base_url="https://belegflow.gotiq.co") as client:
+        assert client.get("/api/health").status_code == 200
+        assert (
+            client.post(
+                "/api/demo",
+                headers={"Origin": "https://belegflow.gotiq.co"},
+                json={"scenario_id": "us-dividend"},
+            ).status_code
+            == 201
+        )
+        assert client.get("/api/health", headers={"Host": "attacker.example"}).status_code == 400
+
+
+def test_public_mode_fails_closed_without_the_access_identity(tmp_path):
+    settings = Settings(
+        data_dir=tmp_path,
+        seed_demo=False,
+        public_host="belegflow.gotiq.co",
+        cloudflare_access_required=True,
+        public_access_email="owner@example.com",
+        _env_file=None,
+    )
+    with TestClient(create_app(settings), base_url="https://belegflow.gotiq.co") as client:
+        assert client.get("/api/health").status_code == 200
+        assert client.get("/api/runs").status_code == 403
+        assert (
+            client.get(
+                "/api/runs", headers={"Cf-Access-Authenticated-User-Email": "other@example.com"}
+            ).status_code
+            == 403
+        )
+        assert (
+            client.get(
+                "/api/runs", headers={"Cf-Access-Authenticated-User-Email": "owner@example.com"}
+            ).status_code
+            == 200
+        )
+
+
 def test_graph_definition_and_sse_come_from_execution(client):
     run = demo(client, "german-invoice")
     graph = client.get("/api/workflow").json()
