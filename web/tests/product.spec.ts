@@ -86,3 +86,34 @@ test('mobile document selection, validation, and setup', async ({ page }, testIn
     true,
   );
 });
+
+test('public demo is anonymous, read-only, and has no live-mode controls', async ({ page }) => {
+  await page.route('**/api/config', (route) =>
+    route.fulfill({
+      json: {
+        live_ready: false,
+        model: '',
+        provider_host: '',
+        max_upload_mb: 15,
+        max_pages: 10,
+        google_ready: false,
+        drive_ready: false,
+        sheets_ready: false,
+        public_demo_mode: true,
+      },
+    }),
+  );
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Live', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Try a sample' })).toBeVisible();
+  await expect(page.getByText(/Fictional sample documents only/)).toBeVisible();
+
+  await page.getByRole('button', { name: 'Try a sample' }).click();
+  await page.getByRole('button', { name: /A dividend, across borders/ }).click();
+  await expect(page.getByRole('heading', { name: 'northstar-dividend-2025.txt' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Approve document' })).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Connections & setup' }).click();
+  await expect(page.getByRole('heading', { name: 'Public demo protections' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Import files' })).toHaveCount(0);
+});

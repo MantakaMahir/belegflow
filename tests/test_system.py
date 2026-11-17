@@ -245,6 +245,61 @@ def test_public_mode_fails_closed_without_the_access_identity(tmp_path):
         )
 
 
+def test_public_demo_is_anonymous_read_only_and_isolates_live_records(tmp_path):
+    settings = Settings(
+        data_dir=tmp_path,
+        seed_demo=False,
+        public_host="belegflow.gotiq.co",
+        public_demo_mode=True,
+        openai_api_key="must-not-be-exposed",
+        google_credentials_file="private-credentials.json",
+        google_drive_folder_id="private-folder",
+        _env_file=None,
+    )
+    with TestClient(create_app(settings), base_url="https://belegflow.gotiq.co") as client:
+        app = client.app
+        app.state.store.create(
+            {
+                "id": "private-live-run",
+                "mode": "live",
+                "filename": "private-tax-record.pdf",
+                "fingerprint": "private-document-fingerprint",
+                "scenario_id": None,
+                "original_text": "CONFIDENTIAL PRIVATE DOCUMENT",
+                "result": {"client_name": "Private Client"},
+            }
+        )
+
+        config = client.get("/api/config").json()
+        assert config["public_demo_mode"] is True
+        assert config["live_ready"] is False
+        assert config["google_ready"] is False
+        assert config["drive_ready"] is False
+        assert config["provider_host"] == ""
+        assert "private-credentials" not in str(config)
+
+        run = demo(client)
+        assert all(value["mode"] == "demo" for value in client.get("/api/runs").json())
+        assert client.get("/api/runs/private-live-run").status_code == 404
+        assert client.get("/api/runs/private-live-run/events").status_code == 404
+        assert client.get("/api/runs/private-live-run/stream").status_code == 404
+        assert client.get("/api/runs/private-live-run/export").status_code == 404
+
+        assert client.post("/api/upload", files={"file": ("tax.pdf", b"private")}).status_code == 403
+        assert client.post("/api/import", json={"source": "drive", "limit": 1}).status_code == 403
+        assert (
+            client.post(f"/api/runs/{run['id']}/approve", json=review_payload(run)).status_code
+            == 403
+        )
+        assert client.post(f"/api/runs/{run['id']}/retry").status_code == 403
+        assert client.post(f"/api/runs/{run['id']}/sheets").status_code == 403
+        assert client.get(f"/api/runs/{run['id']}/export").status_code == 409
+
+        response = client.get("/api/runs/private-live-run")
+        assert "CONFIDENTIAL" not in response.text
+        assert "Private Client" not in response.text
+
+
 def test_graph_definition_and_sse_come_from_execution(client):
     run = demo(client, "german-invoice")
     graph = client.get("/api/workflow").json()

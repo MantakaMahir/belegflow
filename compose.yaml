@@ -12,6 +12,7 @@ services:
       SEED_DEMO: "true"
       CLOUDFLARE_ACCESS_REQUIRED: ${CLOUDFLARE_ACCESS_REQUIRED:-false}
       PUBLIC_ACCESS_EMAIL: ${PUBLIC_ACCESS_EMAIL:-}
+      PUBLIC_DEMO_MODE: ${PUBLIC_DEMO_MODE:-false}
       PUBLIC_HOST: ${PUBLIC_HOST:-}
     volumes:
       - belegflow-data:/app/data

@@ -69,11 +69,13 @@ function StatusBadge({ run }: { run: Run }) {
 function ReviewPanel({
   run,
   config,
+  readOnly = false,
   onRefresh,
   onError,
 }: {
   run: Run;
   config?: Config;
+  readOnly?: boolean;
   onRefresh: () => Promise<void>;
   onError: (value: string) => void;
 }) {
@@ -153,13 +155,13 @@ function ReviewPanel({
       <form onSubmit={approve}>
         <div className="section-heading">
           <h3>Document details</h3>
-          {run.status === 'review' ? (
+          {run.status === 'review' && !readOnly ? (
             <button type="button" className="text-button" onClick={() => setEditing(!editing)}>
               {editing ? 'Close editor' : 'Edit fields'}
             </button>
-          ) : (
+          ) : run.status !== 'review' ? (
             <CheckCircle2 size={15} className="teal" />
-          )}
+          ) : null}
         </div>
         {editing ? (
           <div className="edit-grid">
@@ -289,7 +291,7 @@ function ReviewPanel({
             </div>
           </div>
         ) : null}
-        {run.status === 'review' ? (
+        {run.status === 'review' && !readOnly ? (
           <>
             <label className="notes-label" htmlFor="review-notes">
               Review note <span>Optional</span>
@@ -428,7 +430,19 @@ function SettingsPage({
       <p>
         Demo mode is ready without a key. Live mode runs the same workflow with your own provider.
       </p>
-      <section className="settings-section">
+      {config?.public_demo_mode ? (
+        <section className="settings-section">
+          <h3>
+            <ShieldCheck size={19} /> Public demo protections
+          </h3>
+          <p>
+            This shared instance uses fictional examples only. Uploads, document approvals, retries,
+            AI processing, and Google imports or exports are disabled. Run a local copy to connect
+            your own provider and documents.
+          </p>
+        </section>
+      ) : (
+        <section className="settings-section">
         <h3>
           <Sparkles size={19} /> AI connection
         </h3>
@@ -457,8 +471,9 @@ function SettingsPage({
           Restart the backend after changing configuration. Keys are never sent to the browser.
           Scanned documents require a vision-capable model behind your endpoint.
         </p>
-      </section>
-      <section className="settings-section">
+        </section>
+      )}
+      {!config?.public_demo_mode ? <section className="settings-section">
         <h3>
           <FolderInput size={19} /> Optional Google connectors
         </h3>
@@ -503,15 +518,14 @@ function SettingsPage({
           </div>
           <span className="small-pill">{config?.sheets_ready ? 'Configured' : 'Optional'}</span>
         </div>
-      </section>
+      </section> : null}
       <div className="privacy-notice">
         <ShieldCheck size={21} />
         <div>
           <h3>Local-first is not the same as offline.</h3>
             <p>
-              Demo makes no AI or Google requests. Live mode sends document content to your configured
-              AI endpoint and queries Frankfurter for FX. The VPS copy is protected by Cloudflare
-              Access for its owner; do not share access or use it for real tax records.
+              Demo makes no AI or Google requests. This public instance is a read-only demo with
+              fictional examples; do not upload or enter real tax records.
             </p>
         </div>
       </div>
@@ -530,6 +544,7 @@ function SettingsPage({
 export default function App() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [config, setConfig] = useState<Config>();
+  const publicDemo = config?.public_demo_mode === true;
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [definition, setDefinition] = useState<Definition>();
   const [selected, setSelected] = useState('');
@@ -648,6 +663,10 @@ export default function App() {
   }
   async function upload(file?: File) {
     if (!file) return;
+    if (publicDemo) {
+      setError('Uploads are disabled in this public demo. Try one of the fictional samples instead.');
+      return;
+    }
     if (!config?.live_ready) {
       setError('Set OPENAI_API_KEY in your backend .env, restart, and switch to live mode.');
       return;
@@ -677,6 +696,7 @@ export default function App() {
     }
   }
   async function importGoogle(source: string) {
+    if (publicDemo) return;
     setUploading(true);
     setError('');
     try {
@@ -844,7 +864,7 @@ export default function App() {
                 <Play size={12} />
                 Demo
               </button>
-              <button
+              {!publicDemo ? <button
                 className={mode === 'live' ? 'active' : ''}
                 onClick={() => {
                   setMode('live');
@@ -852,53 +872,61 @@ export default function App() {
                 }}
               >
                 Live
-              </button>
+              </button> : null}
             </div>
             <button
               className="button primary"
-              disabled={uploading}
+              disabled={uploading || (publicDemo && mode === 'live')}
               onClick={() =>
                 mode === 'demo' ? setShowSamples(!showSamples) : input.current?.click()
               }
             >
               {uploading ? <Loader2 size={16} className="spin" /> : <Plus size={17} />}
-              {mode === 'demo' ? 'Try a sample' : 'Upload document'}
+              {mode === 'demo' || publicDemo ? 'Try a sample' : 'Upload document'}
             </button>
           </div>
         </div>
-        <input
-          ref={input}
-          className="visually-hidden"
-          type="file"
-          accept=".pdf,.png,.jpg,.jpeg,.txt,.eml"
-          aria-label="Upload document or email file"
-          onChange={(event) => upload(event.target.files?.[0])}
-        />
+        {!publicDemo ? (
+          <input
+            ref={input}
+            className="visually-hidden"
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg,.txt,.eml"
+            aria-label="Upload document or email file"
+            onChange={(event) => upload(event.target.files?.[0])}
+          />
+        ) : null}
         <div className={`mode-banner ${mode}`}>
           <span className="banner-icon">
             {mode === 'demo' ? <Sparkles size={17} /> : <ShieldCheck size={17} />}
           </span>
           <p>
             <strong>
-              {mode === 'demo'
+              {publicDemo
+                ? 'Explore this read-only product demo.'
+                : mode === 'demo'
                 ? 'Explore the product, without an API key.'
                 : 'Live mode uses your configured AI provider.'}
             </strong>
             <span>
-              {mode === 'demo'
+              {publicDemo
+                ? 'Fictional sample documents only. Uploads, approvals, and external connections are disabled.'
+                : mode === 'demo'
                 ? 'Fictional documents. Prepared AI responses. Real processing flow.'
                 : config?.live_ready
                   ? `Model: ${config.model}. Document content will be sent to ${config.provider_host}.`
                   : 'Configure your API key in the backend .env to process your own documents.'}
             </span>
           </p>
-          <button
-            className="text-button"
-            onClick={() => (mode === 'demo' ? setShowSamples(!showSamples) : setView('settings'))}
-          >
-            {mode === 'demo' ? 'Browse examples' : 'View setup'}
-            <ArrowRight size={14} />
-          </button>
+          {!publicDemo ? (
+            <button
+              className="text-button"
+              onClick={() => (mode === 'demo' ? setShowSamples(!showSamples) : setView('settings'))}
+            >
+              {mode === 'demo' ? 'Browse examples' : 'View setup'}
+              <ArrowRight size={14} />
+            </button>
+          ) : null}
         </div>
         {error ? (
           <div className="error-banner" role="alert">
@@ -1119,7 +1147,9 @@ export default function App() {
                       <span>
                         <span className="connection-dot" />
                         {run.status === 'review'
-                          ? 'Processing complete. Your review is next.'
+                          ? publicDemo
+                            ? 'Sample processing complete. Explore the extracted fields.'
+                            : 'Processing complete. Your review is next.'
                           : run.status === 'approved'
                             ? 'Reviewed and ready to export.'
                             : run.status === 'failed'
@@ -1128,7 +1158,7 @@ export default function App() {
                       </span>
                       <StatusBadge run={run} />
                     </div>
-                    {run.status === 'failed' ? (
+                    {run.status === 'failed' && !publicDemo ? (
                       <div className="failed-state">
                         <AlertCircle size={28} />
                         <h2>Processing stopped safely.</h2>
@@ -1155,6 +1185,7 @@ export default function App() {
                             key={`${run.id}-${run.result.reviewed_at || 'unreviewed'}`}
                             run={run}
                             config={config}
+                            readOnly={publicDemo}
                             onRefresh={refresh}
                             onError={setError}
                           />
@@ -1181,25 +1212,25 @@ export default function App() {
                       <FolderInput size={34} />
                     </span>
                     <h2>
-                      {mode === 'demo'
+                      {publicDemo || mode === 'demo'
                         ? 'Start with a real product walkthrough.'
                         : 'Give your documents a clear path.'}
                     </h2>
                     <p>
-                      {mode === 'demo'
+                      {publicDemo || mode === 'demo'
                         ? 'Choose a fictional example to inspect extraction, historical currency normalization, and human review.'
                         : `Upload a PDF, image, text document, or email file. Up to ${config?.max_upload_mb || 15} MB and ${config?.max_pages || 10} PDF pages.`}
                     </p>
                     <button
                       className="button primary"
                       onClick={() =>
-                        mode === 'demo' ? setShowSamples(true) : input.current?.click()
+                        publicDemo || mode === 'demo' ? setShowSamples(true) : input.current?.click()
                       }
                     >
-                      {mode === 'demo' ? <Play size={16} /> : <Upload size={16} />}
-                      {mode === 'demo' ? 'Explore examples' : 'Choose a file'}
+                      {publicDemo || mode === 'demo' ? <Play size={16} /> : <Upload size={16} />}
+                      {publicDemo || mode === 'demo' ? 'Explore examples' : 'Choose a file'}
                     </button>
-                    {mode === 'live' ? (
+                    {mode === 'live' && !publicDemo ? (
                       <p className="small-note">
                         {config?.live_ready
                           ? 'Your file will be sent to the configured AI provider.'

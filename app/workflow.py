@@ -162,8 +162,10 @@ class Engine:
             logger.error("run_failed id=%s error_type=%s", run_id, type(exc).__name__)
             self.store.update(run_id, status="failed", error=safe)
 
-    def recover(self):
+    def recover(self, *, skip_live=False):
         for run in self.store.list():
+            if skip_live and run["mode"] != "demo":
+                continue
             if run["status"] in {"processing", "queued"}:
                 # Checkpointed steps resume; completed AI steps are not deliberately rerun.
                 config = {"configurable": {"thread_id": run["id"]}}

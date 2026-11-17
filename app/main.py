@@ -95,6 +95,13 @@ def public(run):
     }
 
 
+def demo_only(settings):
+    if settings.public_demo_mode:
+        raise HTTPException(
+            403, "This public demo is read-only. Start a sample from the demo library."
+        )
+
+
 def create_app(settings=None):
     settings = settings or Settings()
     store = Store(settings.data_dir)
@@ -102,7 +109,7 @@ def create_app(settings=None):
 
     @asynccontextmanager
     async def lifespan(app):
-        engine.recover()
+        engine.recover(skip_live=settings.public_demo_mode)
         if settings.seed_demo:
             for key, scenario in SCENARIOS.items():
                 engine.create(
@@ -181,6 +188,18 @@ def create_app(settings=None):
 
     @app.get("/api/config")
     def config():
+        if settings.public_demo_mode:
+            return {
+                "live_ready": False,
+                "model": "",
+                "provider_host": "",
+                "max_upload_mb": settings.max_upload_bytes // 1024 // 1024,
+                "max_pages": settings.max_pages,
+                "google_ready": False,
+                "drive_ready": False,
+                "sheets_ready": False,
+                "public_demo_mode": True,
+            }
         return {
             "live_ready": settings.live_ready,
             "model": settings.openai_model,
@@ -192,6 +211,7 @@ def create_app(settings=None):
                 settings.google_credentials_file and settings.google_drive_folder_id
             ),
             "sheets_ready": bool(settings.google_credentials_file and settings.google_sheet_id),
+            "public_demo_mode": settings.public_demo_mode,
         }
 
     @app.get("/api/scenarios")
@@ -212,11 +232,18 @@ def create_app(settings=None):
 
     @app.get("/api/runs")
     def runs():
-        return [public(run) for run in store.list()]
+        return [
+            public(run)
+            for run in store.list()
+            if not settings.public_demo_mode or run["mode"] == "demo"
+        ]
 
     @app.get("/api/runs/{run_id}")
     def run_detail(run_id: str):
-        return public(store.get(run_id))
+        run = store.get(run_id)
+        if settings.public_demo_mode and run["mode"] != "demo":
+            raise HTTPException(404, "Document not found.")
+        return public(run)
 
     @app.post("/api/demo", status_code=201)
     def start_demo(body: RunInput):
@@ -233,6 +260,7 @@ def create_app(settings=None):
 
     @app.post("/api/upload", status_code=201)
     async def upload(file: UploadFile):
+        demo_only(settings)
         if not settings.live_ready:
             raise HTTPException(
                 409, "Live mode is not configured. Choose a prepared demo or set OPENAI_API_KEY."
@@ -260,12 +288,16 @@ def create_app(settings=None):
 
     @app.get("/api/runs/{run_id}/events")
     def events(run_id: str):
-        store.get(run_id)
+        run = store.get(run_id)
+        if settings.public_demo_mode and run["mode"] != "demo":
+            raise HTTPException(404, "Document not found.")
         return store.events(run_id)
 
     @app.get("/api/runs/{run_id}/stream")
     async def stream(run_id: str, request: Request):
-        store.get(run_id)
+        run = store.get(run_id)
+        if settings.public_demo_mode and run["mode"] != "demo":
+            raise HTTPException(404, "Document not found.")
         after = request.headers.get("last-event-id", "0")
         after = int(after) if after.isdigit() else 0
 
@@ -289,11 +321,13 @@ def create_app(settings=None):
 
     @app.post("/api/runs/{run_id}/approve")
     def approve(run_id: str, body: Review):
+        demo_only(settings)
         engine.approve(run_id, body)
         return {"status": "queued"}
 
     @app.post("/api/runs/{run_id}/retry")
     def retry(run_id: str):
+        demo_only(settings)
         if store.get(run_id)["status"] != "failed":
             raise HTTPException(409, "Only failed runs can be retried.")
         engine.retry(run_id)
@@ -302,6 +336,8 @@ def create_app(settings=None):
     @app.get("/api/runs/{run_id}/export")
     def export(run_id: str, format: str = "csv"):
         run = store.get(run_id)
+        if settings.public_demo_mode and run["mode"] != "demo":
+            raise HTTPException(404, "Document not found.")
         if run["status"] != "approved":
             raise HTTPException(409, "Review and approve the document before export.")
         if format == "csv":
@@ -319,12 +355,14 @@ def create_app(settings=None):
 
     @app.post("/api/import")
     def google_import(body: ImportInput):
+        demo_only(settings)
         if not settings.live_ready:
             raise HTTPException(409, "Configure live AI before importing documents.")
         return {"imported": import_google(settings, engine, body.source, body.limit)}
 
     @app.post("/api/runs/{run_id}/sheets")
     def sheets(run_id: str):
+        demo_only(settings)
         run = store.get(run_id)
         if run["mode"] == "demo" or run["status"] != "approved":
             raise HTTPException(409, "Only approved live documents can be sent to Google Sheets.")

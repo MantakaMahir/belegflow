@@ -6,11 +6,10 @@
 :8080 {
 	@beleg host belegflow.gotiq.co
 	handle @beleg {
-		basic_auth {
-			{$BELEG_USERNAME} {$BELEG_PASSWORD_HASH}
-		}
 		reverse_proxy app:8000 {
 			header_up -Authorization
+			header_up -Cf-Access-Authenticated-User-Email
+			header_up -Cf-Access-Jwt-Assertion
 			header_up Host belegflow.gotiq.co
 			header_up X-Forwarded-Proto https
 		}

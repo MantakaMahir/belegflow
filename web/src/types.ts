@@ -71,6 +71,7 @@ export type Config = {
   google_ready: boolean;
   drive_ready: boolean;
   sheets_ready: boolean;
+  public_demo_mode: boolean;
 };
 export type Scenario = { id: string; title: string; description: string; filename: string };
 export type Definition = {
