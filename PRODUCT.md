@@ -15,10 +15,9 @@ People evaluating Mantaka Mahir's AI engineering work, developers cloning the
 repository, and document reviewers evaluating a German tax-intake workflow.
 
 ## Product Purpose
-Convert an existing n8n document-processing workflow into a useful, publicly
-available application. A no-key demo must explain the product; live mode must
-execute the real pipeline with the operator's credentials. No deployment is
-requested.
+Turn the original n8n automation into a local workbench for German tax document
+review. A public, static walkthrough explains the product with fictional data;
+the local workbench can execute the real pipeline with the operator's credentials.
 
 ## Capabilities and Constraints
 - Confirmed scope: document and email-file intake, OCR, German translation,
@@ -26,6 +25,7 @@ requested.
   classification, human review, CSV/JSON export and optional Google connectors.
 - Demo uses explicitly fictional, prepared responses. It must never call paid
   providers or pretend to process arbitrary documents with a canned response.
+- The public walkthrough must open without login and requires no application server.
 - Live AI uses an OpenAI-compatible endpoint and configurable model, default auto.
 - Credentials remain backend-only in ignored local configuration; do not publish
   the original client export, client identifiers, real documents or API keys.
@@ -41,7 +41,7 @@ extraction and tax classification, historical FX lookup and Google Sheets output
 The original is private input, not a shipping asset.
 
 ## Product Principles
-1. One real workflow, with demo responses substituted only at external boundaries.
+1. The local workbench runs the same workflow with either fixtures or live providers.
 2. Inspectable inputs, node outputs, review decisions and export provenance.
 3. Simple reproducible local setup rather than speculative infrastructure.
 4. No invented financial values, accuracy benchmarks or compliance claims.

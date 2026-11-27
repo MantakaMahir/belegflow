@@ -1,0 +1,56 @@
+<article id="$id" class="sample" data-sample aria-labelledby="$id-title" tabindex="-1">
+  <div class="sample-header">
+    <div>
+      <h3 id="$id-title">$title</h3>
+      <p>$filename</p>
+    </div>
+    <span class="review-state $state_class">$state</span>
+  </div>
+  <div class="comparison">
+    <section class="record-summary" aria-labelledby="$id-record-title">
+      <h4 id="$id-record-title">Extracted record</h4>
+      <div class="amount-display">
+        <dl class="amounts">
+          <div>
+            <dt>Original amount</dt>
+            <dd>$original_amount</dd>
+          </div>
+          <div>
+            <dt>Amount in euros</dt>
+            <dd class="result-amount">$eur_amount</dd>
+          </div>
+        </dl>
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>
+      </div>
+      <p class="rate-note">$rate_note</p>
+    </section>
+
+    <section class="source-pane" aria-labelledby="$id-source-title">
+      <div class="pane-heading">
+        <h4 id="$id-source-title">Source document</h4>
+        $language_controls
+      </div>
+      <div class="paper">
+        <div id="$id-original" class="transcript" data-transcript="original" lang="$language">
+          $original
+        </div>
+        $translation_panel
+      </div>
+      <p class="source-note">$source_note</p>
+    </section>
+
+    <section class="record-details" aria-label="Review details">
+      <dl class="record-fields">
+        <div><dt>Document ID</dt><dd>$record_id</dd></div>
+        <div><dt>Document date</dt><dd>$document_date</dd></div>
+        <div><dt>Suggested category</dt><dd>$category</dd></div>
+        $withholding
+      </dl>
+      <p class="review-note"><strong>What to check:</strong> $review_note</p>
+      <div class="evidence">
+        <h4>Find in the original</h4>
+        <ul>$evidence_links</ul>
+      </div>
+    </section>
+  </div>
+</article>

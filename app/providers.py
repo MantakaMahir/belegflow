@@ -1,7 +1,7 @@
 import json
 import re
 from datetime import date
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import Decimal
 
 import httpx
 from openai import APIConnectionError, APIStatusError, OpenAI
@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from app.demo import SCENARIOS
 from app.models import Classification, Extraction
+from app.money import convert_money
 
 
 class ProviderError(Exception):
@@ -112,16 +113,6 @@ class AI:
             "Suggest the German income category (Einkunftsart) from the supported categories. Distinguish an expense receipt from income. Use Unclassified if unclear. Give a cautious assessment, exact short source quotations in evidence, and warnings for missing data or foreign withholding. This is review assistance, not legal advice.",
             json.dumps({"source": text, "extracted": extraction}, ensure_ascii=False),
         )
-
-
-def convert_money(amount, rate):
-    if amount is None or rate is None:
-        return None
-    return str(
-        (Decimal(str(amount)) * Decimal(str(rate))).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
-    )
 
 
 def historical_fx(extraction, mode, scenario_id=None):

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" data-type="software">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'">
+    <meta name="page-type" content="software">
+    <meta name="site-kind" content="software">
+    <meta name="theme-color" content="#edf0e8">
+    <meta name="description" content="Explore how Beleg turns fictional documents into reviewable German tax records. A browser-only demo by Mantaka Mahir.">
+    <meta property="og:title" content="Beleg — Tax documents, ready for review">
+    <meta property="og:description" content="Compare a source document, its German translation, and the tax record Beleg would prepare for review.">
+    <meta property="og:type" content="website">
+    <title>Beleg — German tax document review</title>
+    <link rel="icon" href="assets/beleg.svg" type="image/svg+xml">
+    <link rel="preload" href="assets/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="styles.css">
+    <script src="demo.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="masthead">
+      <div class="wrap masthead-inner">
+        <a class="wordmark" href="./" aria-label="Beleg home">
+          <img src="assets/beleg.svg" width="34" height="34" alt="">
+          Beleg
+        </a>
+        <nav aria-label="Main navigation">
+          <a href="#workflow">How it works</a>
+          <a class="repo-link" href="https://github.com/MantakaMahir/belegflow">
+            GitHub
+            <svg aria-hidden="true" viewBox="0 0 16 16" width="15" height="15"><path d="M4 12 12 4m-6 0h6v6"/></svg>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+      <div class="wrap">
+        <section class="intro" data-enter aria-labelledby="intro-title">
+          <h1 id="intro-title">Tax documents,<br>ready for review.</h1>
+          <div class="intro-action">
+            <p>Beleg prepares German tax records from source files. Compare the original, its translation, and the values a reviewer would check.</p>
+            <a class="primary-action" href="#demo">
+              Explore samples
+              <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18"><path d="M10 4v12m-5-5 5 5 5-5"/></svg>
+            </a>
+          </div>
+        </section>
+
+        <section id="demo" class="demo" aria-labelledby="demo-title" tabindex="-1">
+          <div class="demo-heading">
+            <h2 id="demo-title">Sample documents</h2>
+            <p><span class="demo-dot" aria-hidden="true"></span> Simulation with fictional data</p>
+          </div>
+          <div class="sample-picker" role="group" aria-label="Choose a sample document" hidden>
+            $sample_controls
+          </div>
+          <noscript>
+            <p class="noscript-note">All three original documents and extracted records are shown below when JavaScript is off.</p>
+          </noscript>
+          $sample_panels
+        </section>
+      </div>
+
+      <section id="workflow" class="workflow" aria-labelledby="workflow-title">
+        <div class="wrap workflow-inner">
+          <div class="workflow-intro">
+            <h2 id="workflow-title">How Beleg works</h2>
+            <p>The full app prepares a record for a human reviewer. This site replays sample results in your browser, without a server or API key.</p>
+            <a class="underlined" href="https://github.com/MantakaMahir/belegflow#architecture">Read the architecture</a>
+          </div>
+          <ol class="workflow-steps">
+            <li>
+              <div>
+                <h3>Text extraction and translation</h3>
+                <p>Extract text from PDFs or scans, identify key fields, and keep a German translation alongside the original.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Currency conversion</h3>
+                <p>Apply a historical exchange rate with decimal arithmetic. Missing dates or currencies stop the conversion.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Human review</h3>
+                <p>LangGraph saves progress and pauses so a reviewer can check the suggested category against the source.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Record export</h3>
+                <p>After approval, the local app exports a structured CSV or JSON file.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer wrap">
+      <div>
+        <p>Built by <a class="underlined" href="https://github.com/MantakaMahir">Mantaka Mahir</a></p>
+        <p class="footer-note">Fictional examples for demonstration. No tax advice.</p>
+      </div>
+      <a class="underlined" href="https://github.com/MantakaMahir/belegflow#quick-start">Run Beleg locally</a>
+    </footer>
+  </body>
+</html>

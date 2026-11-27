@@ -2,6 +2,8 @@
 
 **Turn documents into reviewable German tax records with the workflow visible.**
 
+[Explore the public demo](https://mantakamahir.github.io/belegflow/) · [Run Beleg locally](#quick-start) · [Read the architecture](#architecture)
+
 Beleg is a local-first, open-source application for German tax document intake,
 translation, structured extraction, historical EUR conversion, and suggested tax
 classification. It replaces an existing n8n automation with a Python execution
@@ -15,8 +17,10 @@ checkpoint, review, and export code.
 > internet-facing SaaS. Human approval is required before export. This project
 > does not claim tax-law compliance, calibrated AI confidence, or audited accuracy.
 
-The VPS demo is restricted to the owner's Cloudflare Access identity. It is not
-open public document processing. See [`deploy/README.md`](deploy/README.md).
+The public demo is a browser-only walkthrough of three fictional examples. It
+shows original text, German translations, currency conversion, and review
+evidence without a login, API calls, or a running backend. The full workbench
+runs locally and is the place to try approvals, export, and live processing.
 
 ## What you can do
 
@@ -49,8 +53,7 @@ deployment is needed for the demo. The first build downloads dependencies;
 subsequent demo use does not call external services.
 
 Documents and checkpoints persist in the `belegflow-data` Docker volume. Stop the
-application with `docker compose down`; this does not delete the volume. See
-[`deploy/README.md`](deploy/README.md) for the owner-only VPS deployment.
+application with `docker compose down`; this does not delete the volume.
 
 ### Option B: Python + Node.js
 
@@ -72,7 +75,7 @@ from one origin. If the port is occupied, choose another port in this command.
 For frontend development, run `npm run dev --prefix web` in another terminal.
 Vite serves the interface on port 5173 and proxies `/api` to port 8000.
 
-## Try the demo
+## Try the local demo
 
 The workspace creates three fictional examples on first startup:
 
@@ -128,10 +131,6 @@ one schema-repair attempt. It does not assume every compatible proxy supports
 OpenAI's strict JSON-schema response mode. Text documents need a text-capable
 model; scanned PDFs and images additionally require **vision support** behind
 the configured model. `auto` routing does not guarantee that support.
-
-The VPS production profile requires both the verified Cloudflare Access identity
-and a separate Caddy origin credential. These deployment settings are not enabled
-by the local demo profile.
 
 ### Configuration
 
@@ -192,6 +191,12 @@ the destination sheet before retrying manually. This is not an exactly-once
 distributed delivery guarantee.
 
 ## Architecture
+
+The public site and the local workbench share the fictional fixtures in
+[`app/demo.py`](app/demo.py) and the EUR rounding function in
+[`app/money.py`](app/money.py). The public build renders them into static files and
+publishes only that output to GitHub Pages. The pipeline below runs in the local
+workbench. See [`deploy/README.md`](deploy/README.md) for the static build and hosting.
 
 ```mermaid
 flowchart LR

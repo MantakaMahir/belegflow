@@ -1,11 +1,10 @@
 # Security policy and operating boundary
 
-Beleg: German Tax Document Review is a local, single-operator portfolio product.
-It is not designed for untrusted internet traffic or certified for regulated
-financial data. The VPS production profile requires owner-only Cloudflare Access
-and origin authentication. Publish only after the Access app/policy, Tunnel
-origin-token validation, loopback-only ports, and origin credential have all been
-configured and verified. Do not bypass that boundary or publish the API directly.
+The public Beleg walkthrough serves static files with fictional data. It has no
+upload, approval, processing, or integration endpoints and needs no credentials.
+The full Beleg application is a local, single-operator workbench. Keep the API on
+loopback; it is not designed for untrusted internet traffic or certified for
+regulated financial data.
 
 ## Credentials
 

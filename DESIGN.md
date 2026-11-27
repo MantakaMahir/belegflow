@@ -1,6 +1,29 @@
 # Beleg: German Tax Document Review design system
 
-## Product surface
+## Public walkthrough
+
+The public site speaks to a first-time visitor. Its opening pairs a short product
+explanation with the sample selector and the start of a source-to-record
+comparison. The US dividend is the default because the translation and USD-to-EUR
+conversion communicate the workflow in one example. The invoice shows when no
+conversion is needed; the incomplete receipt shows where review stops.
+
+- **Color:** a moss-tinted canvas, paper for the original, fir green for the
+  extracted record, and a pale green highlight for converted values and cited
+  evidence. Amber denotes missing information.
+- **Type:** one locally served Archivo variable font. Monetary fields use
+  tabular figures; interface copy uses sentence case.
+- **Layout:** side-by-side source and record on desktop. On narrow screens the
+  conversion comes first, followed by the document and review details.
+- **Interaction:** sample selection updates the shareable fragment. An evidence
+  link opens the original and focuses the line it cites. Reduced-motion users
+  see the same content without transitions.
+- **Delivery:** `site/` contains the templates, styles, script, and assets;
+  `deploy/build_demo.py` renders static HTML from the fictional app fixtures.
+  All three original documents and records remain readable without JavaScript.
+  Only `site/dist/` is published.
+
+## Local workbench
 
 The primary surface is a local document-review workbench. Its first screen keeps
 the queue, source evidence, currency conversion, classification, and next action
