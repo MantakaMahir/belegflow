@@ -58,13 +58,15 @@ test('the static demo works without an API, including keyboard navigation and ev
 
   await page.getByRole('button', { name: 'German translation' }).click();
   await expect(page.getByText('Bruttodividende: 1.250,00 USD')).toBeVisible();
-  await page.getByRole('link', { name: 'Gross dividend: USD 1,250.00', exact: true }).click();
+  await page.getByRole('link', { name: 'Show amount in source' }).click();
   await expect(page.locator('#us-dividend-line-5')).toBeFocused();
   await expect(page.locator('#us-dividend-line-5')).toHaveText('Gross dividend: USD 1,250.00');
 
   await page.getByRole('button', { name: /German invoice/ }).click();
   await expect(page.getByText('€2,400.00', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'German translation' })).toHaveCount(0);
+  await page.getByRole('link', { name: 'Show amount in source' }).click();
+  await expect(page.locator('#german-invoice-line-6')).toBeFocused();
 
   await page.getByRole('button', { name: /Incomplete receipt/ }).click();
   await expect(page.getByText('Missing information', { exact: true })).toBeVisible();

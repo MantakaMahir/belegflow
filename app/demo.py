@@ -5,6 +5,7 @@ SCENARIOS = {
         "title": "A dividend, across borders",
         "description": "English investment statement · USD → EUR · foreign withholding review",
         "filename": "northstar-dividend-2025.txt",
+        "amount_line": "Gross dividend:",
         "text": """NORTHSTAR SECURITIES — FICTIONAL DEMO DOCUMENT
 Dividend statement | NS-2025-0418
 Client: Alex Morgan | Client number: DEMO-104
@@ -50,6 +51,7 @@ This document is synthetic and has no financial or legal value.""",
         "title": "An invoice, already in EUR",
         "description": "German consulting invoice · no FX required · structured extraction",
         "filename": "studio-west-invoice-2025.txt",
+        "amount_line": "Rechnungsbetrag gesamt:",
         "text": """STUDIO WEST — FIKTIVES DEMODOKUMENT
 Rechnung SW-2025-092
 Mandant: Alex Morgan | Mandantennummer: DEMO-104
@@ -92,6 +94,7 @@ Einmalige Leistung. Fiktives Dokument ohne rechtlichen Wert.""",
         "title": "Missing data, not invented data",
         "description": "Incomplete receipt · ambiguous $ currency · export blocked until corrected",
         "filename": "travel-receipt-incomplete.txt",
+        "amount_line": "Total paid:",
         "text": """HARBOR TRAVEL — FICTIONAL DEMO DOCUMENT
 Receipt HT-8821
 Passenger: Alex Morgan

@@ -36,11 +36,11 @@ def format_date(value):
     return f"{day.day} {day:%b %Y}"
 
 
-def render_transcript(text, sample_id, quotes=()):
+def render_transcript(text, sample_id, linked_lines=()):
     lines = []
     for index, line in enumerate(text.splitlines()):
         line_id = f"{sample_id}-line-{index}"
-        target = f' id="{line_id}" tabindex="-1"' if any(quote in line for quote in quotes) else ""
+        target = f' id="{line_id}" tabindex="-1"' if index in linked_lines else ""
         lines.append(f"<p{target}>{html.escape(line)}</p>")
     return "\n".join(lines)
 
@@ -68,10 +68,17 @@ def render_sample(sample_id, scenario, template):
         if tax is not None:
             withholding = f"<div><dt>Withheld tax in euros</dt><dd>€{Decimal(tax):,.2f}</dd></div>"
 
-    quotes = classification["evidence"]
+    source_lines = scenario["text"].splitlines()
+    amount_line = next(
+        i for i, line in enumerate(source_lines) if line.startswith(scenario["amount_line"])
+    )
+    linked_lines = {amount_line}
     evidence_links = []
-    for quote in quotes:
-        index = next(i for i, line in enumerate(scenario["text"].splitlines()) if quote in line)
+    for quote in classification["evidence"]:
+        index = next(i for i, line in enumerate(source_lines) if quote in line)
+        linked_lines.add(index)
+        if index == amount_line:
+            continue
         evidence_links.append(
             f'<li><a href="#{sample_id}-line-{index}">{html.escape(quote)}</a></li>'
         )
@@ -105,6 +112,7 @@ def render_sample(sample_id, scenario, template):
         "original_amount": f"{amount:,.2f} {currency}" if currency else f"${amount:,.2f}",
         "eur_amount": converted,
         "rate_note": rate_note,
+        "amount_source": f"#{sample_id}-line-{amount_line}",
         "record_id": extraction["document_id"],
         "document_date": format_date(day) if day else "Missing",
         "category": classification["income_type"],
@@ -112,7 +120,7 @@ def render_sample(sample_id, scenario, template):
     }
     return template.substitute(
         {key: html.escape(value) for key, value in values.items()},
-        original=render_transcript(scenario["text"], sample_id, quotes),
+        original=render_transcript(scenario["text"], sample_id, linked_lines),
         language_controls=language_controls,
         translation_panel=translation_panel,
         withholding=withholding,

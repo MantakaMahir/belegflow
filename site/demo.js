@@ -49,8 +49,8 @@ for (const sample of samples) {
     });
   }
 
-  sample.querySelector('.evidence').addEventListener('click', (event) => {
-    if (event.target.closest('a')) showLanguage(sample, 'original');
+  sample.addEventListener('click', (event) => {
+    if (event.target.closest('.evidence a, .amount-source')) showLanguage(sample, 'original');
   });
 }
 
